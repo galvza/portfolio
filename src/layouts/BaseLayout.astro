@@ -131,5 +131,20 @@ const siteUrl = (Astro.site?.toString() ?? 'https://gsdigitais.com').replace(/\/
         newDocument.documentElement.classList.toggle('dark', isDark);
       });
     </script>
+    {/* Ofuscação de email — monta mailto: via JS pra evitar Cloudflare Email Protection */}
+    <script>
+      function initEmailLinks() {
+        document.querySelectorAll<HTMLAnchorElement>('[data-email-user]').forEach((el) => {
+          const user = el.dataset.emailUser;
+          const domain = el.dataset.emailDomain;
+          if (user && domain) {
+            el.href = 'mailto:' + user + '@' + domain;
+            const textEl = el.querySelector('[data-email-text]');
+            if (textEl) textEl.textContent = user + '@' + domain;
+          }
+        });
+      }
+      document.addEventListener('astro:page-load', initEmailLinks);
+    </script>
   </body>
 </html>
