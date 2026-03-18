@@ -1,0 +1,57 @@
+---
+// Cursor customizado — desktop only (≥ 1024px, sem touch).
+// cursor.ts detecta o ambiente e decide se inicializa.
+---
+
+<!--
+  transition:persist mantém os elementos e o estado GSAP (transforms/opacity)
+  através das navegações com View Transitions — sem flash ao trocar de página.
+-->
+<div id="cursor-dot" aria-hidden="true" role="presentation" transition:persist></div>
+<div id="cursor-ring" aria-hidden="true" role="presentation" transition:persist></div>
+
+<style is:global>
+  /* Elementos do cursor — sempre no DOM, visíveis só quando JS ativa */
+  #cursor-dot,
+  #cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    will-change: transform;
+    /* Posição inicial via GSAP.set() — sem flash no (0,0) */
+  }
+
+  #cursor-dot {
+    width: 8px;
+    height: 8px;
+    /* Offset de metade do tamanho para centralizar no ponto do cursor */
+    margin-left: -4px;
+    margin-top: -4px;
+    background-color: var(--color-accent);
+  }
+
+  #cursor-ring {
+    width: 32px;
+    height: 32px;
+    margin-left: -16px;
+    margin-top: -16px;
+    border: 1.5px solid var(--color-accent);
+    background-color: transparent;
+  }
+
+  /*
+    Esconde o cursor nativo quando cursor customizado está ativo.
+    Especificidade (0,1,1) supera as regras de UA para `a`, `button`, etc.
+  */
+  html.cursor-custom * {
+    cursor: none;
+  }
+</style>
+
+<script>
+  import '@/scripts/cursor';
+</script>

@@ -1,0 +1,56 @@
+---
+title: 100k Orders
+description: Interactive dashboard analyzing the Olist dataset of 100,000 Brazilian e-commerce orders, with statistical, geographic, and predictive analyses.
+date: 2025-11-10
+locale: en
+stack: [DuckDB, Python, scipy, scikit-learn, statsmodels, Next.js 14, Recharts, Leaflet, Tailwind CSS, Cloudflare Pages]
+liveUrl: https://100kpedidos.gsdigitais.com
+githubUrl: https://github.com/galvza/100k-pedidos
+image: /images/projects/100k-pedidos.png
+imageAlt: Screenshot of the 100k Orders dashboard
+featured: true
+order: 2
+---
+
+## Context
+
+The Olist dataset on Kaggle is one of the most comprehensive datasets on Brazilian e-commerce: 100,000 real orders with customer, seller, product, review, and geolocation data. It's widely used in data portfolios, but most analyses stay on the surface — basic bar charts and descriptive statistics.
+
+## The Problem
+
+How to go beyond superficial analysis and extract insights that would actually be useful for an e-commerce operation, presenting everything interactively and accessibly?
+
+## Technical Decisions
+
+- **DuckDB** as the analytical engine — SQL processing directly on files, no database server
+- **Python** with scipy, scikit-learn, and statsmodels for statistical and predictive analyses
+- **Next.js 14** for the interactive frontend
+- **Recharts** for charts and **Leaflet** for geographic maps
+- **Tailwind CSS** for styling
+- **Cloudflare Pages** for deployment
+
+I chose DuckDB over pure pandas for performance in complex analytical queries and familiar SQL syntax.
+
+## The Process
+
+The analysis was divided into progressive layers:
+
+1. **Descriptive** — order distribution, seasonality, average ticket by category
+2. **Geographic** — heatmap of sellers and customers, regional concentration, freight analysis by distance
+3. **Statistical** — hypothesis testing, correlations, customer segmentation
+4. **Predictive** — delivery delay and customer satisfaction prediction models
+
+The frontend was built as a multi-tab dashboard, each telling part of the story. The Leaflet map was particularly challenging due to the number of data points (optimized with clustering).
+
+The project has 373 automated tests (253 Python + 120 frontend), ensuring analyses are reproducible and the dashboard works correctly.
+
+## The Result
+
+A complete dashboard with descriptive, geographic, statistical, and predictive analyses. Over 15 interactive visualizations including maps, scatter plots, and time series. Test coverage above 80%.
+
+## Lessons Learned
+
+- DuckDB is incredibly efficient for exploratory analysis — data warehouse performance without the complexity
+- Interactive maps with many points need optimization (clustering, lazy loading)
+- Dividing analysis into progressive layers (descriptive → geographic → statistical → predictive) creates a more convincing narrative than throwing everything together
+- 373 tests might seem excessive for a portfolio project, but they ensured refactoring didn't break anything

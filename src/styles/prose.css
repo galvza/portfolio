@@ -1,0 +1,293 @@
+/* ============================================
+   prose.css — Estilos para conteúdo MDX
+   Usar via classe .prose no wrapper do conteúdo.
+   Importar apenas nos layouts que renderizam MDX.
+   ============================================ */
+
+.prose {
+  max-width: 65ch;
+  color: var(--color-text);
+  line-height: 1.75;
+  /* Evita overflow horizontal por palavras longas (URLs, código inline) */
+  overflow-wrap: break-word;
+}
+
+/* ============================================
+   Headings
+   ============================================ */
+.prose :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose h1 {
+  font-size: clamp(1.875rem, 3vw + 0.75rem, 2.5rem);
+  margin-top: 0;
+}
+
+.prose h2 {
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2rem);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.prose h3 {
+  font-size: clamp(1.25rem, 1.5vw + 0.375rem, 1.5rem);
+}
+
+.prose h4 {
+  font-size: 1.125rem;
+}
+
+/* ============================================
+   Parágrafos
+   ============================================ */
+.prose p {
+  margin-bottom: 1.5rem;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   Links
+   ============================================ */
+.prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.prose a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* ============================================
+   Code — inline
+   ============================================ */
+.prose code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  color: var(--color-accent);
+}
+
+/* ============================================
+   Code — blocks (via Shiki no Astro)
+   ============================================ */
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  /* Shiki define o background via atributo style — não sobrescrever */
+}
+
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Linha de destaque em code blocks */
+.prose pre .line--highlighted {
+  background-color: rgb(255 255 255 / 0.1);
+  margin-inline: -1.5rem;
+  padding-inline: 1.5rem;
+}
+
+/* ============================================
+   Blockquotes
+   ============================================ */
+.prose blockquote {
+  border-left: 4px solid var(--color-accent);
+  padding: 0.75rem 1.25rem;
+  margin: 1.5rem 0;
+  background-color: var(--color-bg-alt);
+  border-radius: 0 0.375rem 0.375rem 0;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.prose blockquote p {
+  margin-bottom: 0;
+}
+
+.prose blockquote strong {
+  color: var(--color-text);
+}
+
+/* ============================================
+   Listas
+   ============================================ */
+.prose :is(ul, ol) {
+  padding-left: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+/* Listas aninhadas */
+.prose :is(ul, ol) :is(ul, ol) {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.prose li > :is(p, ul, ol):last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   Imagens
+   ============================================ */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem auto;
+  border: 1px solid var(--color-border);
+}
+
+.prose figure {
+  margin: 1.5rem 0;
+}
+
+.prose figcaption {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* ============================================
+   Separadores
+   ============================================ */
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5rem 0;
+}
+
+/* ============================================
+   Tabelas
+   ============================================ */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  display: block;
+}
+
+.prose thead {
+  border-bottom: 2px solid var(--color-border);
+}
+
+.prose th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: var(--color-bg-alt);
+}
+
+.prose td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.prose tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover {
+  background-color: var(--color-bg-alt);
+}
+
+/* ============================================
+   Strong e Em
+   ============================================ */
+.prose strong {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.prose em {
+  font-style: italic;
+}
+
+/* ============================================
+   Callouts customizados (componentes MDX)
+   Uso: <aside class="callout callout-info">
+   ============================================ */
+.prose .callout {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid currentColor;
+}
+
+.prose .callout-info {
+  background-color: oklch(94% 0.02 250);
+  border-color: oklch(55% 0.18 250);
+  color: oklch(30% 0.1 250);
+}
+
+.dark .prose .callout-info {
+  background-color: oklch(25% 0.04 250);
+  border-color: oklch(65% 0.18 250);
+  color: oklch(85% 0.08 250);
+}
+
+.prose .callout-warning {
+  background-color: oklch(97% 0.02 80);
+  border-color: oklch(70% 0.18 75);
+  color: oklch(35% 0.1 75);
+}
+
+.dark .prose .callout-warning {
+  background-color: oklch(25% 0.04 75);
+  border-color: oklch(75% 0.18 75);
+  color: oklch(88% 0.08 75);
+}
+
+.prose .callout-danger {
+  background-color: oklch(97% 0.02 20);
+  border-color: oklch(60% 0.22 25);
+  color: oklch(35% 0.1 20);
+}
+
+.dark .prose .callout-danger {
+  background-color: oklch(22% 0.04 20);
+  border-color: oklch(65% 0.22 25);
+  color: oklch(87% 0.06 20);
+}

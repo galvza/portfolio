@@ -1,0 +1,272 @@
+---
+import FormField from './FormField.astro';
+import FormFeedback from './FormFeedback.astro';
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const endpoint = import.meta.env.FORMSPREE_ENDPOINT ?? 'https://formspree.io/f/mlgpagbb';
+
+const messages = JSON.stringify({
+  required: t('contact.required', locale),
+  invalidEmail: t('contact.invalidEmail', locale),
+  messageTooShort: t('contact.messageTooShort', locale),
+});
+
+const labels = {
+  name: locale === 'pt-br' ? 'Nome' : 'Name',
+  email: 'Email',
+  subject: locale === 'pt-br' ? 'Assunto' : 'Subject',
+  message: locale === 'pt-br' ? 'Mensagem' : 'Message',
+};
+---
+
+<div>
+  <form
+    id="contact-form"
+    method="post"
+    novalidate
+    data-endpoint={endpoint}
+    data-messages={messages}
+    class="flex flex-col gap-5"
+  >
+    {/* Honeypot — invisível para humanos, bots preenchem */}
+    <div
+      aria-hidden="true"
+      class="absolute -left-[9999px] opacity-0 pointer-events-none overflow-hidden"
+      tabindex="-1"
+    >
+      <input
+        type="text"
+        name="_gotcha"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2">
+      <FormField
+        id="name"
+        label={labels.name}
+        type="text"
+        placeholder={t('contact.namePlaceholder', locale)}
+        required={true}
+        autocomplete="name"
+      />
+      <FormField
+        id="email"
+        label="Email"
+        type="email"
+        placeholder={t('contact.emailPlaceholder', locale)}
+        required={true}
+        autocomplete="email"
+      />
+    </div>
+
+    <FormField
+      id="contact_type"
+      label={t('contact.contactTypeLabel', locale)}
+      type="select"
+      placeholder={t('contact.contactTypePlaceholder', locale)}
+      options={[
+        { value: 'job', label: t('contact.contactTypeJob', locale) },
+        { value: 'project', label: t('contact.contactTypeProject', locale) },
+        { value: 'quote', label: t('contact.contactTypeQuote', locale) },
+        { value: 'other', label: t('contact.contactTypeOther', locale) },
+      ]}
+    />
+
+    <FormField
+      id="subject"
+      label={labels.subject}
+      type="text"
+      placeholder={t('contact.subjectPlaceholder', locale)}
+      autocomplete="off"
+    />
+
+    <FormField
+      id="message"
+      label={labels.message}
+      type="textarea"
+      placeholder={t('contact.messagePlaceholder', locale)}
+      required={true}
+      rows={6}
+      autocomplete="off"
+    />
+
+    <div>
+      <button
+        type="submit"
+        data-submit-btn
+        class="inline-flex items-center justify-center gap-2 h-12 px-8 text-sm font-medium
+               bg-accent text-white hover:bg-accent-hover transition-colors
+               disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto"
+      >
+        <span data-btn-text>{t('contact.send', locale)}</span>
+        <span data-btn-spinner hidden aria-hidden="true">
+          <svg
+            class="animate-spin"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+          </svg>
+          {t('contact.sending', locale)}
+        </span>
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-5">
+    <FormFeedback
+      successMessage={t('contact.success', locale)}
+      errorMessage={t('contact.error', locale)}
+      sendAnotherLabel={t('contact.sendAnother', locale)}
+    />
+  </div>
+</div>
+
+<script>
+  import { validateContactForm } from '@/utils/validation';
+  import type { ContactFormData, ValidationMessages } from '@/utils/validation';
+
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  if (!form) throw new Error('Formulário de contato não encontrado');
+
+  const messages = JSON.parse(form.dataset.messages ?? '{}') as ValidationMessages;
+  const endpoint = form.dataset.endpoint ?? '#';
+
+  const btnSubmit = form.querySelector<HTMLButtonElement>('[data-submit-btn]')!;
+  const btnText = btnSubmit.querySelector<HTMLElement>('[data-btn-text]')!;
+  const btnSpinner = btnSubmit.querySelector<HTMLElement>('[data-btn-spinner]')!;
+  const feedbackSuccess = document.getElementById('feedback-success');
+  const feedbackError = document.getElementById('feedback-error');
+  const btnSendAnother = document.getElementById('btn-send-another');
+
+  function getField(name: string) {
+    return form!.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[name="${name}"]`);
+  }
+
+  function setFieldError(name: string, message: string) {
+    const field = getField(name);
+    const errorEl = document.getElementById(`${name}-error`);
+    if (field) {
+      field.setAttribute('aria-invalid', 'true');
+      field.style.borderColor = '#ef4444';
+    }
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
+  }
+
+  function clearFieldError(name: string) {
+    const field = getField(name);
+    const errorEl = document.getElementById(`${name}-error`);
+    if (field) {
+      field.removeAttribute('aria-invalid');
+      field.style.borderColor = '';
+    }
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.hidden = true;
+    }
+  }
+
+  function clearAllErrors() {
+    ['name', 'email', 'contact_type', 'subject', 'message'].forEach(clearFieldError);
+  }
+
+  function setLoading(loading: boolean) {
+    btnSubmit.disabled = loading;
+    btnText.hidden = loading;
+    btnSpinner.hidden = !loading;
+  }
+
+  function showSuccess() {
+    form!.hidden = true;
+    if (feedbackSuccess) feedbackSuccess.hidden = false;
+    if (feedbackError) feedbackError.hidden = true;
+  }
+
+  function showNetworkError() {
+    if (feedbackError) feedbackError.hidden = false;
+    if (feedbackSuccess) feedbackSuccess.hidden = true;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Verificação honeypot — bots preenchem esse campo, humanos não
+    const honeypot = form!.querySelector<HTMLInputElement>('[name="_gotcha"]');
+    if (honeypot?.value) return;
+
+    clearAllErrors();
+
+    const data: ContactFormData = {
+      name: (getField('name') as HTMLInputElement)?.value ?? '',
+      email: (getField('email') as HTMLInputElement)?.value ?? '',
+      subject: (getField('subject') as HTMLInputElement)?.value ?? '',
+      message: (getField('message') as HTMLTextAreaElement)?.value ?? '',
+    };
+
+    const contactType = (form!.querySelector<HTMLSelectElement>('[name="contact_type"]'))?.value ?? '';
+
+    const { valid, errors } = validateContactForm(data, messages);
+
+    if (!valid) {
+      for (const [field, error] of Object.entries(errors)) {
+        setFieldError(field, error as string);
+      }
+      const firstInvalid = form!.querySelector<HTMLElement>('[aria-invalid="true"]');
+      firstInvalid?.focus();
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = contactType
+        ? { ...data, contact_type: contactType }
+        : data;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        form!.reset();
+        showSuccess();
+        // Plausible event
+        if (typeof window.plausible === 'function') {
+          window.plausible('submit_contact');
+        }
+      } else {
+        showNetworkError();
+      }
+    } catch {
+      showNetworkError();
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  btnSendAnother?.addEventListener('click', () => {
+    if (feedbackSuccess) feedbackSuccess.hidden = true;
+    if (feedbackError) feedbackError.hidden = true;
+    form!.hidden = false;
+    form!.reset();
+    clearAllErrors();
+  });
+</script>

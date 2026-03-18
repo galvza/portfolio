@@ -1,0 +1,23 @@
+---
+/**
+ * Wrapper de parallax via GSAP ScrollTrigger.
+ *
+ * Desktop (≥ 1024px): aplica deslocamento Y proporcional ao scroll.
+ * Mobile (< 1024px): sem efeito (apenas renderiza o conteúdo normalmente).
+ *
+ * A lógica real está em src/scripts/animations.ts (initParallax).
+ * Este componente apenas marca o elemento com [data-parallax].
+ *
+ * @param speed — intensidade do parallax (0.1 = sutil, 0.5 = forte)
+ */
+interface Props {
+  speed?: number;
+  class?: string;
+}
+
+const { speed = 0.3, class: className } = Astro.props;
+---
+
+<div data-parallax={String(speed)} class={className}>
+  <slot />
+</div>

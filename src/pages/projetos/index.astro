@@ -1,0 +1,18 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectGrid from '@/components/projects/ProjectGrid.astro';
+import { getCollection } from 'astro:content';
+import { t } from '@/i18n/utils';
+
+const locale = 'pt-br' as const;
+const projects = await getCollection('projects');
+const title = t('seo.projectsTitle', locale);
+const description = t('seo.projectsDescription', locale);
+---
+
+<BaseLayout {title} {description} {locale}>
+  <section class="container section">
+    <h1 class="mb-10">{t('projects.title', locale)}</h1>
+    <ProjectGrid {projects} {locale} />
+  </section>
+</BaseLayout>

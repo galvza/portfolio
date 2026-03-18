@@ -1,0 +1,86 @@
+---
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  tags: string[];
+  locale: Locale;
+}
+
+const { tags, locale } = Astro.props;
+
+const tagPageBase = locale === 'en' ? '/en/blog/tag' : '/blog/tag';
+---
+
+{tags.length > 0 && (
+  <nav
+    aria-label={locale === 'en' ? 'Filter posts by tag' : 'Filtrar posts por tag'}
+    class="mb-8"
+  >
+    <ul class="flex flex-wrap gap-2" role="list">
+
+      {/* Botão "Todos" — filtra client-side */}
+      <li>
+        <button
+          type="button"
+          class="tag-filter-btn active px-3 py-1 text-xs font-medium border transition-colors bg-accent text-white border-accent"
+          data-tag="all"
+        >
+          {t('blog.allTags', locale)}
+        </button>
+      </li>
+
+      {tags.map((tag) => (
+        <li>
+          <button
+            type="button"
+            class="tag-filter-btn px-3 py-1 text-xs font-medium border border-border text-text-muted hover:border-accent hover:text-accent transition-colors"
+            data-tag={tag}
+          >
+            <a
+              href={`${tagPageBase}/${tag}`}
+              class="tag-page-link"
+              data-tag-name={tag}
+              tabindex="-1"
+              aria-hidden="true"
+            ></a>
+            {tag}
+          </button>
+        </li>
+      ))}
+
+    </ul>
+  </nav>
+)}
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.tag-filter-btn');
+  const items = document.querySelectorAll<HTMLElement>('[data-tags]');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag') ?? 'all';
+
+      // Atualiza estado visual dos botões
+      buttons.forEach((b) => {
+        const isActive = b.getAttribute('data-tag') === tag;
+        b.classList.toggle('active', isActive);
+        b.classList.toggle('bg-accent', isActive);
+        b.classList.toggle('text-white', isActive);
+        b.classList.toggle('border-accent', isActive);
+        b.classList.toggle('text-text-muted', !isActive);
+        b.classList.toggle('border-border', !isActive);
+      });
+
+      // Filtra os cards de post
+      items.forEach((item) => {
+        if (tag === 'all') {
+          item.hidden = false;
+        } else {
+          const postTags = item.getAttribute('data-tags')?.split(',') ?? [];
+          item.hidden = !postTags.includes(tag);
+        }
+      });
+    });
+  });
+</script>

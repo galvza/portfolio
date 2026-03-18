@@ -1,0 +1,27 @@
+---
+import UsesItem from './UsesItem.astro';
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+import type { UsesCategory } from '@/data/uses';
+
+interface Props {
+  category: UsesCategory;
+  locale: Locale;
+}
+
+const { category, locale } = Astro.props;
+---
+
+<section aria-labelledby={`uses-${category.id}`} class="mb-14 last:mb-0">
+  <h2
+    id={`uses-${category.id}`}
+    class="text-sm font-semibold uppercase tracking-widest text-text-muted mb-1 pb-3 border-b border-border"
+  >
+    {t(category.labelKey, locale)}
+  </h2>
+  <ul role="list" class="m-0 p-0 list-none">
+    {category.items.map((item) => (
+      <UsesItem name={item.name} description={item.description} url={item.url} />
+    ))}
+  </ul>
+</section>

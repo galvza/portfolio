@@ -1,0 +1,209 @@
+---
+import { t, getLocalizedPath } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+import LangToggle from './LangToggle.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+}
+
+const { locale, currentPath } = Astro.props;
+
+const homeHref = locale === 'en' ? '/en/' : '/';
+
+const navLinks = [
+  { key: 'nav.projects', href: getLocalizedPath('/projetos', locale) },
+  { key: 'nav.blog', href: getLocalizedPath('/blog', locale) },
+  { key: 'nav.about', href: getLocalizedPath('/sobre', locale) },
+  { key: 'nav.skills', href: getLocalizedPath('/skills', locale) },
+  { key: 'nav.contact', href: getLocalizedPath('/contato', locale) },
+];
+
+function isActive(href: string): boolean {
+  const c = currentPath.length > 1 ? currentPath.replace(/\/$/, '') : currentPath;
+  const h = href.length > 1 ? href.replace(/\/$/, '') : href;
+  return c === h || (h !== '/' && h !== '/en' && c.startsWith(h + '/'));
+}
+---
+
+<header id="site-header" class="sticky top-0 z-50 bg-bg border-b border-border">
+  <div class="container">
+    <div class="flex items-center justify-between h-16">
+
+      {/* Logo */}
+      <a
+        href={homeHref}
+        class="font-heading font-bold text-xl hover:text-accent transition-colors"
+        aria-label={t('nav.home', locale)}
+      >
+        Gabriel Alves
+      </a>
+
+      {/* Desktop nav — visível em ≥ lg */}
+      <nav aria-label={t('nav.ariaLabel', locale)} class="hidden lg:flex items-center gap-6">
+        {navLinks.map(({ key, href }) => (
+          <a
+            href={href}
+            class={`text-sm font-medium transition-colors hover:text-accent ${
+              isActive(href)
+                ? 'text-accent underline underline-offset-4 decoration-2'
+                : 'text-text-muted'
+            }`}
+            aria-current={isActive(href) ? 'page' : undefined}
+          >
+            {t(key, locale)}
+          </a>
+        ))}
+      </nav>
+
+      {/* Desktop toggles */}
+      <div class="hidden lg:flex items-center gap-1">
+        <LangToggle locale={locale} currentPath={currentPath} />
+        <ThemeToggle locale={locale} />
+      </div>
+
+      {/* Mobile hamburger — visível em < lg */}
+      <button
+        id="nav-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        aria-label="Menu"
+        class="lg:hidden flex flex-col justify-center items-center w-11 h-11 gap-1.5"
+      >
+        <span class="nav-bar block w-5 h-px bg-current transition-all duration-300 ease-in-out"></span>
+        <span class="nav-bar block w-5 h-px bg-current transition-all duration-300 ease-in-out"></span>
+        <span class="nav-bar block w-5 h-px bg-current transition-all duration-300 ease-in-out"></span>
+      </button>
+
+    </div>
+  </div>
+
+  {/* Mobile nav (slide-down) */}
+  <div
+    id="mobile-nav"
+    role="navigation"
+    aria-label={t('nav.ariaLabel', locale)}
+    aria-hidden="true"
+    class="mobile-nav lg:hidden border-t border-border bg-bg"
+  >
+    <div class="container py-4">
+      <ul class="flex flex-col gap-1" role="list">
+        {navLinks.map(({ key, href }) => (
+          <li>
+            <a
+              href={href}
+              class={`flex items-center h-11 text-base font-medium transition-colors hover:text-accent ${
+                isActive(href) ? 'text-accent' : 'text-text'
+              }`}
+              aria-current={isActive(href) ? 'page' : undefined}
+            >
+              {t(key, locale)}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      {/* Toggles dentro do menu mobile */}
+      <div class="flex items-center gap-2 pt-4 mt-4 border-t border-border">
+        <span class="text-sm text-text-muted mr-1">{t('common.language', locale)}:</span>
+        <LangToggle locale={locale} currentPath={currentPath} />
+        <ThemeToggle locale={locale} />
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* Mobile menu — slide-down via max-height */
+  .mobile-nav {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+  }
+
+  .mobile-nav.is-open {
+    max-height: 80dvh;
+  }
+
+  /* Hamburger → X */
+  #nav-toggle.is-open .nav-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  #nav-toggle.is-open .nav-bar:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  #nav-toggle.is-open .nav-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+</style>
+
+<script>
+  /*
+    AbortController permite remover todos os listeners em bloco ao re-inicializar.
+    Necessário para Astro View Transitions: o DOM do header é substituído a cada
+    navegação, então precisamos referenciar os novos elementos.
+  */
+  let abort: AbortController | null = null;
+
+  function setupNav(): void {
+    abort?.abort();
+    abort = new AbortController();
+    const { signal } = abort;
+
+    const toggle = document.getElementById('nav-toggle');
+    const menu = document.getElementById('mobile-nav');
+
+    if (!toggle || !menu) return;
+
+    function openMenu(): void {
+      menu!.classList.add('is-open');
+      toggle!.classList.add('is-open');
+      toggle!.setAttribute('aria-expanded', 'true');
+      menu!.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeMenu(): void {
+      menu!.classList.remove('is-open');
+      toggle!.classList.remove('is-open');
+      toggle!.setAttribute('aria-expanded', 'false');
+      menu!.setAttribute('aria-hidden', 'true');
+    }
+
+    toggle.addEventListener('click', () => {
+      const isOpen = menu!.classList.contains('is-open');
+      if (isOpen) closeMenu(); else openMenu();
+    }, { signal });
+
+    // Fechar ao pressionar Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu!.classList.contains('is-open')) {
+        closeMenu();
+        toggle!.focus();
+      }
+    }, { signal });
+
+    // Fechar ao clicar fora do header
+    document.addEventListener('click', (e) => {
+      const header = document.getElementById('site-header');
+      if (header && !header.contains(e.target as Node) && menu!.classList.contains('is-open')) {
+        closeMenu();
+      }
+    }, { signal });
+  }
+
+  // Inicialização inicial
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupNav);
+  } else {
+    setupNav();
+  }
+
+  // Re-inicializa após cada navegação com View Transitions
+  document.addEventListener('astro:page-load', setupNav);
+</script>

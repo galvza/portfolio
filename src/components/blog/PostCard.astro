@@ -1,0 +1,66 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+import { formatLocalizedDate } from '@/utils/dates';
+import { calculateReadingTime } from '@/utils/reading-time';
+import ReadingTime from './ReadingTime.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  locale: Locale;
+}
+
+const { post, locale } = Astro.props;
+const { title, description, date, tags } = post.data;
+
+const slug = post.id.split('/')[0];
+const href = locale === 'en' ? `/en/blog/${slug}` : `/blog/${slug}`;
+const readingMinutes = calculateReadingTime(post.body ?? '');
+const formattedDate = formatLocalizedDate(date, locale);
+---
+
+<article class="group flex flex-col gap-4 h-full border border-border p-6 hover:border-accent transition-colors">
+
+  {/* Título + link */}
+  <h2 class="font-heading font-bold text-xl leading-snug group-hover:text-accent transition-colors">
+    <a href={href} class="block">
+      {title}
+    </a>
+  </h2>
+
+  {/* Descrição */}
+  <p class="text-text-muted text-sm line-clamp-3 flex-1">
+    {description}
+  </p>
+
+  {/* Meta: data + tempo de leitura */}
+  <div class="flex items-center gap-3 text-sm text-text-muted">
+    <time datetime={date.toISOString()}>{formattedDate}</time>
+    <span aria-hidden="true">·</span>
+    <ReadingTime minutes={readingMinutes} {locale} />
+  </div>
+
+  {/* Tags */}
+  {tags.length > 0 && (
+    <ul class="flex flex-wrap gap-2" role="list">
+      {tags.map((tag) => (
+        <li>
+          <span class="inline-block px-2 py-0.5 text-xs font-medium bg-bg-alt border border-border text-text-muted">
+            {tag}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {/* Ler mais */}
+  <a
+    href={href}
+    class="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover transition-colors mt-auto"
+    aria-label={`${t('common.readMore', locale)}: ${title}`}
+  >
+    {t('common.readMore', locale)} →
+  </a>
+
+</article>

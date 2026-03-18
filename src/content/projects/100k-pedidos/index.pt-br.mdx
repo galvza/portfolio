@@ -1,0 +1,56 @@
+---
+title: 100k Pedidos
+description: Dashboard interativo analisando o dataset Olist de 100 mil pedidos de e-commerce brasileiro, com análises estatísticas, geográficas e preditivas.
+date: 2025-11-10
+locale: pt-br
+stack: [DuckDB, Python, scipy, scikit-learn, statsmodels, Next.js 14, Recharts, Leaflet, Tailwind CSS, Cloudflare Pages]
+liveUrl: https://100kpedidos.gsdigitais.com
+githubUrl: https://github.com/galvza/100k-pedidos
+image: /images/projects/100k-pedidos.png
+imageAlt: Screenshot do dashboard 100k Pedidos
+featured: true
+order: 2
+---
+
+## O Contexto
+
+O dataset da Olist no Kaggle é um dos mais completos sobre e-commerce brasileiro: 100 mil pedidos reais, com dados de clientes, vendedores, produtos, avaliações e geolocalização. É amplamente usado em portfólios de dados, mas a maioria das análises fica na superfície — gráficos de barras básicos e estatísticas descritivas.
+
+## O Problema
+
+Como ir além da análise superficial e extrair insights que realmente seriam úteis pra uma operação de e-commerce, apresentando tudo de forma interativa e acessível?
+
+## Decisões Técnicas
+
+- **DuckDB** como engine analítico — processamento SQL direto no arquivo, sem servidor de banco
+- **Python** com scipy, scikit-learn e statsmodels para análises estatísticas e preditivas
+- **Next.js 14** para o frontend interativo
+- **Recharts** para gráficos e **Leaflet** para mapas geográficos
+- **Tailwind CSS** para estilização
+- **Cloudflare Pages** para deploy
+
+Escolhi DuckDB sobre pandas puro pela performance em consultas analíticas complexas e pela sintaxe SQL familiar.
+
+## O Processo
+
+A análise foi dividida em camadas progressivas:
+
+1. **Descritiva** — distribuição de pedidos, sazonalidade, ticket médio por categoria
+2. **Geográfica** — mapa de calor de vendedores e clientes, concentração regional, análise de frete por distância
+3. **Estatística** — testes de hipótese, correlações, segmentação de clientes
+4. **Preditiva** — modelos de previsão de atraso de entrega e satisfação do cliente
+
+O frontend foi construído como um dashboard com múltiplas abas, cada uma contando uma parte da história. O mapa com Leaflet foi particularmente desafiador pela quantidade de pontos (otimizado com clustering).
+
+O projeto tem 373 testes automatizados (253 Python + 120 frontend), garantindo que as análises são reproduzíveis e o dashboard funciona corretamente.
+
+## O Resultado
+
+Um dashboard completo com análises descritivas, geográficas, estatísticas e preditivas. Mais de 15 visualizações interativas incluindo mapas, gráficos de dispersão e séries temporais. Cobertura de testes acima de 80%.
+
+## Aprendizados
+
+- DuckDB é absurdamente eficiente pra análise exploratória — performance de data warehouse sem a complexidade
+- Mapas interativos com muitos pontos precisam de otimização (clustering, lazy loading)
+- Dividir a análise em camadas progressivas (descritiva → geográfica → estatística → preditiva) cria uma narrativa mais convincente do que jogar tudo junto
+- 373 testes podem parecer exagero pra um projeto de portfólio, mas garantiram que refatorações não quebraram nada

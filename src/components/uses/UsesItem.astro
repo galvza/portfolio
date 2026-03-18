@@ -1,0 +1,44 @@
+---
+interface Props {
+  name: string;
+  description: string;
+  url?: string;
+}
+
+const { name, description, url } = Astro.props;
+---
+
+<li class="py-4 border-b border-border last:border-b-0 sm:grid sm:grid-cols-[200px_1fr] sm:gap-8 sm:items-start">
+  <div class="mb-1 sm:mb-0">
+    {url ? (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="font-semibold text-text hover:text-accent transition-colors inline-flex items-center gap-1"
+      >
+        {name}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="11"
+          height="11"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          class="opacity-60"
+        >
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </a>
+    ) : (
+      <span class="font-semibold text-text">{name}</span>
+    )}
+  </div>
+  <p class="text-sm text-text-muted leading-relaxed">{description}</p>
+</li>

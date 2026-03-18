@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '@/i18n/config';
+import { t } from '@/i18n/utils';
+import PostCard from './PostCard.astro';
+import ScrollReveal from '@/components/animations/ScrollReveal.astro';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  locale: Locale;
+}
+
+const { posts, locale } = Astro.props;
+
+const visible = posts
+  .filter((p) => p.data.locale === locale && !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+{visible.length === 0 ? (
+  <p class="text-text-muted py-12 text-center">{t('blog.noResults', locale)}</p>
+) : (
+  <ScrollReveal direction="up" stagger={0.08}>
+    <ul
+      class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+      role="list"
+    >
+      {visible.map((post) => (
+        <li data-tags={post.data.tags.join(',')}>
+          <PostCard {post} {locale} />
+        </li>
+      ))}
+    </ul>
+  </ScrollReveal>
+)}

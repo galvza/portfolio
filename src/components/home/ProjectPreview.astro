@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import type { Locale } from '@/i18n/config';
+import { t, getLocalizedPath } from '@/i18n/utils';
+import ProjectCard from '@/components/projects/ProjectCard.astro';
+import ScrollReveal from '@/components/animations/ScrollReveal.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const allProjects = await getCollection('projects');
+
+const featured = allProjects
+  .filter((p) => p.data.locale === locale && p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
+const allHref = getLocalizedPath('/projetos', locale);
+---
+
+<section class="container section" aria-labelledby="featured-projects-heading">
+
+  <ScrollReveal direction="up">
+    <div class="flex items-baseline justify-between mb-10">
+      <h2 id="featured-projects-heading">{t('home.projectsTitle', locale)}</h2>
+      <a
+        href={allHref}
+        class="shrink-0 ml-4 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
+      >
+        {t('home.viewAllProjects', locale)} →
+      </a>
+    </div>
+  </ScrollReveal>
+
+  {featured.length > 0 ? (
+    <ScrollReveal direction="up" stagger={0.1}>
+      <ul class="grid gap-8 sm:grid-cols-2" role="list">
+        {featured.map((project) => (
+          <li>
+            <ProjectCard {project} {locale} />
+          </li>
+        ))}
+      </ul>
+    </ScrollReveal>
+  ) : (
+    <p class="text-text-muted py-12 text-center">{t('common.allProjects', locale)}</p>
+  )}
+
+</section>

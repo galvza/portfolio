@@ -1,0 +1,14 @@
+---
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  minutes: number;
+  locale: Locale;
+}
+
+const { minutes, locale } = Astro.props;
+const text = t('blog.readingTime', locale).replace('{minutes}', String(minutes));
+---
+
+<span class="text-sm text-text-muted">{text}</span>

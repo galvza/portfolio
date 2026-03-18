@@ -1,0 +1,104 @@
+---
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+import ScrollReveal from '@/components/animations/ScrollReveal.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const services = [
+  {
+    titleKey: 'home.service1Title' as const,
+    descKey: 'home.service1Description' as const,
+    icon: 'chart',
+  },
+  {
+    titleKey: 'home.service2Title' as const,
+    descKey: 'home.service2Description' as const,
+    icon: 'cog',
+  },
+  {
+    titleKey: 'home.service3Title' as const,
+    descKey: 'home.service3Description' as const,
+    icon: 'globe',
+  },
+  {
+    titleKey: 'home.service4Title' as const,
+    descKey: 'home.service4Description' as const,
+    icon: 'megaphone',
+  },
+];
+---
+
+<section class="container section" aria-labelledby="services-heading">
+
+  <ScrollReveal direction="up">
+    <div class="mb-10">
+      <h2 id="services-heading">{t('home.servicesTitle', locale)}</h2>
+      <p class="text-text-muted mt-2 max-w-xl">{t('home.servicesSubtitle', locale)}</p>
+    </div>
+  </ScrollReveal>
+
+  <ScrollReveal direction="up" stagger={0.1}>
+    <ul class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4" role="list">
+      {services.map((s) => (
+        <li>
+          <article class="flex flex-col gap-3 h-full border border-border p-6 hover:border-accent transition-colors">
+            {/* Ícone */}
+            <div class="text-accent" aria-hidden="true">
+              {s.icon === 'chart' && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+              )}
+              {s.icon === 'cog' && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"></path>
+                  <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 22v-2"></path>
+                  <path d="m17 20.66-1-1.73"></path>
+                  <path d="M11 10.27 7 3.34"></path>
+                  <path d="m20.66 17-1.73-1"></path>
+                  <path d="m3.34 7 1.73 1"></path>
+                  <path d="M14 12h8"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="m20.66 7-1.73 1"></path>
+                  <path d="m3.34 17 1.73-1"></path>
+                  <path d="m17 3.34-1 1.73"></path>
+                  <path d="m11 13.73-4 6.93"></path>
+                </svg>
+              )}
+              {s.icon === 'globe' && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              )}
+              {s.icon === 'megaphone' && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m3 11 18-5v12L3 13v-2z"></path>
+                  <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+                </svg>
+              )}
+            </div>
+
+            <h3 class="font-heading font-bold text-lg leading-snug">
+              {t(s.titleKey, locale)}
+            </h3>
+            <p class="text-text-muted text-sm flex-1">
+              {t(s.descKey, locale)}
+            </p>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </ScrollReveal>
+
+</section>

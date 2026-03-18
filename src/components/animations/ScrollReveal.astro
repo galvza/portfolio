@@ -1,0 +1,36 @@
+---
+/**
+ * Wrapper de scroll reveal via GSAP + ScrollTrigger.
+ *
+ * Desktop (≥ 1024px): fade + slide na direção configurada.
+ * Mobile (< 1024px): fade simples, sem slide.
+ * Se `stagger` > 0: anima os filhos <li>/<article> individualmente.
+ *
+ * A lógica de animação está em src/scripts/animations.ts.
+ * Este componente apenas marca o elemento com [data-scroll-reveal].
+ */
+interface Props {
+  direction?: 'up' | 'down' | 'left' | 'right';
+  /** Atraso inicial em segundos */
+  delay?: number;
+  /** Duração da animação em segundos */
+  duration?: number;
+  /** Intervalo em segundos entre cada filho (para listas/grids) */
+  stagger?: number;
+  class?: string;
+}
+
+const {
+  direction = 'up',
+  delay = 0,
+  duration = 0.7,
+  stagger = 0,
+  class: className,
+} = Astro.props;
+
+const revealData = JSON.stringify({ direction, delay, duration, stagger });
+---
+
+<div data-scroll-reveal={revealData} class={className}>
+  <slot />
+</div>

@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import type { Locale } from '@/i18n/config';
+import { t, getLocalizedPath } from '@/i18n/utils';
+import PostCard from '@/components/blog/PostCard.astro';
+import ScrollReveal from '@/components/animations/ScrollReveal.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const allPosts = await getCollection('blog');
+
+const recent = allPosts
+  .filter((p) => p.data.locale === locale && !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const allHref = getLocalizedPath('/blog', locale);
+---
+
+<section class="container section" aria-labelledby="recent-posts-heading">
+
+  <ScrollReveal direction="up">
+    <div class="flex items-baseline justify-between mb-10">
+      <h2 id="recent-posts-heading">{t('home.blogTitle', locale)}</h2>
+      <a
+        href={allHref}
+        class="shrink-0 ml-4 text-sm font-medium text-accent hover:text-accent-hover transition-colors"
+      >
+        {t('home.viewAllPosts', locale)} →
+      </a>
+    </div>
+  </ScrollReveal>
+
+  {recent.length > 0 ? (
+    <ScrollReveal direction="up" stagger={0.08}>
+      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
+        {recent.map((post) => (
+          <li>
+            <PostCard {post} {locale} />
+          </li>
+        ))}
+      </ul>
+    </ScrollReveal>
+  ) : (
+    <p class="text-text-muted py-12 text-center">{t('blog.noResults', locale)}</p>
+  )}
+
+</section>

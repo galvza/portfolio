@@ -1,0 +1,78 @@
+---
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  label: string;
+  type?: 'text' | 'email' | 'textarea' | 'select';
+  placeholder?: string;
+  required?: boolean;
+  autocomplete?: string;
+  rows?: number;
+  options?: SelectOption[];
+}
+
+const {
+  id,
+  label,
+  type = 'text',
+  placeholder,
+  required = false,
+  autocomplete,
+  rows = 5,
+  options = [],
+} = Astro.props;
+
+const inputClass =
+  'w-full px-4 bg-bg border border-border text-text placeholder:text-text-muted ' +
+  'focus:outline-none focus:border-accent transition-colors text-sm';
+---
+
+<div class="flex flex-col gap-1.5">
+  <label for={id} class="text-sm font-medium text-text">
+    {label}
+    {required && <span class="text-red-500 ml-0.5" aria-hidden="true">*</span>}
+  </label>
+
+  {type === 'textarea' ? (
+    <textarea
+      id={id}
+      name={id}
+      placeholder={placeholder}
+      required={required || undefined}
+      rows={rows}
+      autocomplete={autocomplete}
+      class={`${inputClass} py-3 resize-none`}
+      aria-describedby={`${id}-error`}
+    />
+  ) : type === 'select' ? (
+    <select
+      id={id}
+      name={id}
+      required={required || undefined}
+      class={`${inputClass} h-11 appearance-none cursor-pointer`}
+      aria-describedby={`${id}-error`}
+    >
+      {placeholder && <option value="" disabled selected>{placeholder}</option>}
+      {options.map((opt) => (
+        <option value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  ) : (
+    <input
+      type={type}
+      id={id}
+      name={id}
+      placeholder={placeholder}
+      required={required || undefined}
+      autocomplete={autocomplete}
+      class={`${inputClass} h-11`}
+      aria-describedby={`${id}-error`}
+    />
+  )}
+
+  <p id={`${id}-error`} class="text-xs text-red-500" hidden aria-live="polite"></p>
+</div>

@@ -1,0 +1,161 @@
+---
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<div
+  id="search-container"
+  role="search"
+  aria-label={locale === 'en' ? 'Search posts' : 'Buscar posts'}
+  class="relative mb-8"
+  data-locale={locale}
+  data-no-results={t('blog.noResults', locale)}
+  data-placeholder={t('blog.searchPlaceholder', locale)}
+>
+  <label for="pagefind-input" class="sr-only">
+    {t('blog.searchPlaceholder', locale)}
+  </label>
+  <input
+    id="pagefind-input"
+    type="search"
+    autocomplete="off"
+    placeholder={t('blog.searchPlaceholder', locale)}
+    class="w-full h-11 px-4 border border-border bg-bg text-text text-sm placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+  />
+
+  {/* Dropdown de resultados — preenchido pelo JS */}
+  <div
+    id="search-results"
+    role="listbox"
+    aria-label={locale === 'en' ? 'Search results' : 'Resultados da busca'}
+    class="absolute top-full left-0 right-0 z-50 mt-1 border border-border bg-bg shadow-lg max-h-80 overflow-y-auto hidden"
+  ></div>
+</div>
+
+<script>
+  const container = document.getElementById('search-container');
+  const input = document.getElementById('pagefind-input') as HTMLInputElement | null;
+  const resultsEl = document.getElementById('search-results') as HTMLElement | null;
+
+  if (!container || !input || !resultsEl) throw new Error('SearchBar: elementos não encontrados');
+
+  const locale = container.getAttribute('data-locale') ?? 'pt-br';
+  const noResultsText = container.getAttribute('data-no-results') ?? 'No results.';
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let pf: any = null;
+  // Variável impede Vite de resolver o path em compile time
+  const pfPath = '/pagefind/pagefind.js';
+
+  async function loadPagefind(): Promise<boolean> {
+    if (pf) return true;
+    try {
+      // Pagefind é gerado no build — não existe em dev
+      pf = await import(/* @vite-ignore */ pfPath);
+      await pf.init({ language: locale });
+      return true;
+    } catch {
+      console.warn('Pagefind not available (expected in dev mode)');
+      return false;
+    }
+  }
+
+  function renderResults(items: { url: string; title: string; excerpt: string }[]) {
+    if (items.length === 0) {
+      resultsEl!.innerHTML = `
+        <p class="px-4 py-3 text-sm text-text-muted">${noResultsText}</p>
+      `;
+    } else {
+      resultsEl!.innerHTML = items
+        .map(
+          (item) => `
+          <a
+            href="${item.url}"
+            role="option"
+            class="block px-4 py-3 hover:bg-bg-alt border-b border-border last:border-0 transition-colors"
+          >
+            <div class="text-sm font-medium text-text">${item.title}</div>
+            <div class="text-xs text-text-muted mt-0.5 line-clamp-2">${item.excerpt}</div>
+          </a>
+        `,
+        )
+        .join('');
+    }
+    resultsEl!.classList.remove('hidden');
+  }
+
+  async function doSearch(query: string) {
+    if (!query.trim()) {
+      resultsEl!.classList.add('hidden');
+      resultsEl!.innerHTML = '';
+      return;
+    }
+
+    const loaded = await loadPagefind();
+    if (!loaded) {
+      const devMsg = locale === 'en'
+        ? 'Search is only available in production.'
+        : 'Busca disponível apenas em produção.';
+      renderResults([]);
+      resultsEl!.innerHTML = `<p class="px-4 py-3 text-sm text-text-muted">${devMsg}</p>`;
+      resultsEl!.classList.remove('hidden');
+      return;
+    }
+
+    const search = await pf.search(query);
+
+    const resolved = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      search.results.slice(0, 8).map((r: any) => r.data()),
+    );
+
+    renderResults(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      resolved.map((d: any) => ({
+        url: d.url,
+        title: d.meta?.title ?? d.url,
+        excerpt: d.excerpt ?? '',
+      })),
+    );
+  }
+
+  // Preload pagefind ao focar
+  input.addEventListener('focus', () => loadPagefind());
+
+  // Debounce: aguarda 200ms após parar de digitar
+  let debounce: ReturnType<typeof setTimeout>;
+  let searchTracked = false;
+  input.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      doSearch(input.value);
+      // Plausible event — dispara uma vez por sessão de busca
+      if (input.value.trim() && !searchTracked && typeof window.plausible === 'function') {
+        window.plausible('search_blog');
+        searchTracked = true;
+      }
+      if (!input.value.trim()) searchTracked = false;
+    }, 200);
+  });
+
+  // Fechar ao pressionar Escape
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      resultsEl!.classList.add('hidden');
+      input.blur();
+    }
+  });
+
+  // Fechar ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!container!.contains(e.target as Node)) {
+      resultsEl!.classList.add('hidden');
+    }
+  });
+</script>

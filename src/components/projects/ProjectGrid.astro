@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '@/i18n/config';
+import { t } from '@/i18n/utils';
+import ProjectCard from './ProjectCard.astro';
+import ScrollReveal from '@/components/animations/ScrollReveal.astro';
+
+interface Props {
+  projects: CollectionEntry<'projects'>[];
+  locale: Locale;
+}
+
+const { projects, locale } = Astro.props;
+
+const visible = projects
+  .filter((p) => p.data.locale === locale)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+{visible.length === 0 ? (
+  <p class="text-text-muted py-12 text-center">{t('common.allProjects', locale)}</p>
+) : (
+  <ScrollReveal direction="up" stagger={0.1}>
+    <ul class="grid gap-8 sm:grid-cols-2" role="list">
+      {visible.map((project) => (
+        <li>
+          <ProjectCard {project} {locale} />
+        </li>
+      ))}
+    </ul>
+  </ScrollReveal>
+)}

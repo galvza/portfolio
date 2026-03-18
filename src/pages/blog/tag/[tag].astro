@@ -1,0 +1,52 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostList from '@/components/blog/PostList.astro';
+import { getCollection } from 'astro:content';
+import { t } from '@/i18n/utils';
+
+export async function getStaticPaths() {
+  const posts = await getCollection(
+    'blog',
+    ({ data }) => !data.draft && data.locale === 'pt-br',
+  );
+  const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
+
+  return allTags.map((tag) => ({
+    params: { tag },
+    props: { tag, posts },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: Awaited<ReturnType<typeof getCollection<'blog'>>>;
+}
+
+const { tag, posts } = Astro.props;
+const locale = 'pt-br' as const;
+
+const filtered = posts.filter((p) => p.data.tags.includes(tag));
+const title = `${t('nav.blog', locale)}: ${tag}`;
+const description = t('seo.blogDescription', locale);
+---
+
+<BaseLayout {title} {description} {locale}>
+  <section class="container section">
+    <a
+      href="/blog"
+      class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent transition-colors mb-8"
+    >
+      ← {t('common.allPosts', locale)}
+    </a>
+
+    <h1 class="mb-2">{t('nav.blog', locale)}</h1>
+    <p class="text-text-muted mb-10">
+      <span class="inline-block px-2 py-0.5 text-sm font-medium bg-bg-alt border border-border">
+        {tag}
+      </span>
+      <span class="ml-2 text-sm">({filtered.length})</span>
+    </p>
+
+    <PostList posts={filtered} {locale} />
+  </section>
+</BaseLayout>

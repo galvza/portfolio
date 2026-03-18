@@ -1,0 +1,29 @@
+---
+import { getLocalizedPath, getAlternateLang, t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+}
+
+const { locale, currentPath } = Astro.props;
+
+const alternateLang = getAlternateLang(locale);
+const alternatePath = getLocalizedPath(currentPath, alternateLang);
+
+// Exibe sigla do idioma para o qual o link navega
+const label = alternateLang === 'en' ? 'EN' : 'PT';
+const hreflang = alternateLang === 'en' ? 'en' : 'pt-BR';
+---
+
+<a
+  href={alternatePath}
+  hreflang={hreflang}
+  aria-label={t('common.language', locale)}
+  data-track="switch_language"
+  data-track-props={JSON.stringify({ to: alternateLang })}
+  class="flex items-center justify-center h-11 px-3 font-medium text-sm text-text-muted transition-colors hover:text-text hover:bg-bg-alt rounded-md"
+>
+  {label}
+</a>

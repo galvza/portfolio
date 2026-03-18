@@ -1,0 +1,135 @@
+---
+import '@/styles/global.css';
+import SEOHead from '@/components/common/SEOHead.astro';
+import Header from '@/components/common/Header.astro';
+import Footer from '@/components/common/Footer.astro';
+import PageTransition from '@/components/animations/PageTransition.astro';
+import CustomCursor from '@/components/animations/CustomCursor.astro';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  title: string;
+  description: string;
+  locale: Locale;
+  /** Caminho relativo ou URL absoluta da imagem OG */
+  image?: string;
+  /** Tipo de conteúdo para Open Graph */
+  type?: 'website' | 'article';
+  /** Data de publicação — obrigatória quando type='article' */
+  publishedTime?: Date;
+  /** Tags do artigo — usadas em og:article:tag e JSON-LD */
+  tags?: string[];
+}
+
+const { title, description, locale, image, type = 'website', publishedTime, tags } = Astro.props;
+
+// BCP 47: pt-br → pt-BR, en → en
+const htmlLang = locale === 'pt-br' ? 'pt-BR' : 'en';
+const siteUrl = (Astro.site?.toString() ?? 'https://gsdigitais.com').replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {/*
+      Anti-flash: script inline executado ANTES do primeiro paint.
+      Aplica a classe .dark no <html> para evitar flash de tema errado.
+      Conforme ARCHITECTURE.md seção 7.
+    */}
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      } catch {
+        // localStorage bloqueado (modo privado, CSP, etc.) — usa light
+      }
+    </script>
+
+    {/* Preload fontes críticas — evita FOUT nas headlines e body */}
+    <link
+      rel="preload"
+      href="/fonts/space-grotesk-latin-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/inter-latin-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    {/* SEO completo: title, description, canonical, OG, Twitter, hreflang, JSON-LD */}
+    <SEOHead
+      {title}
+      {description}
+      {locale}
+      {siteUrl}
+      canonicalPath={Astro.url.pathname}
+      {image}
+      {type}
+      {publishedTime}
+      {tags}
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {/* Plausible Analytics */}
+    <script is:inline async src="https://plausible.io/js/pa-mH8Zcl8nZi-SltAnSH_5G.js"></script>
+    <script is:inline>
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+      plausible.init()
+    </script>
+
+    {/* Transições de página — fade suave entre navegações */}
+    <PageTransition />
+
+    {/* Slot para meta tags adicionais específicas de página */}
+    <slot name="head" />
+  </head>
+
+  <body class="bg-bg text-text font-body min-h-screen flex flex-col">
+    <Header locale={locale} currentPath={Astro.url.pathname} />
+
+    <main id="main-content" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer locale={locale} />
+
+    {/* Cursor customizado — desktop only, inicializado via cursor.ts */}
+    <CustomCursor />
+
+    {/* Animações GSAP + ScrollTrigger — bundled por Vite, executado uma vez por página */}
+    <script>
+      import '@/scripts/animations';
+    </script>
+
+    {/* Rastreamento de cliques via data-track attributes */}
+    <script>
+      import { initAnalytics } from '@/scripts/analytics';
+      document.addEventListener('astro:page-load', initAnalytics);
+    </script>
+
+    {/*
+      Persistência de tema entre navegações com View Transitions.
+      astro:before-swap copia a classe .dark do documento atual para o incoming
+      ANTES do swap ser aplicado — sem flash de tema errado durante a transição.
+      Este script roda uma vez e persiste em todas as navegações client-side.
+    */}
+    <script>
+      document.addEventListener('astro:before-swap', (e: Event) => {
+        const isDark = document.documentElement.classList.contains('dark');
+        const { newDocument } = e as Event & { newDocument: Document };
+        newDocument.documentElement.classList.toggle('dark', isDark);
+      });
+    </script>
+  </body>
+</html>

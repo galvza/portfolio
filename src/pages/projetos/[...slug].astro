@@ -1,0 +1,29 @@
+---
+import CaseStudyLayout from '@/layouts/CaseStudyLayout.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection(
+    'projects',
+    ({ data }) => data.locale === 'pt-br',
+  );
+
+  return projects.map((entry) => ({
+    params: { slug: entry.id.split('/')[0] },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'projects'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const locale = 'pt-br' as const;
+---
+
+<CaseStudyLayout project={entry} {locale}>
+  <Content />
+</CaseStudyLayout>

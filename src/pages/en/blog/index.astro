@@ -1,0 +1,25 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostList from '@/components/blog/PostList.astro';
+import SearchBar from '@/components/blog/SearchBar.astro';
+import TagFilter from '@/components/blog/TagFilter.astro';
+import { getCollection } from 'astro:content';
+import { t } from '@/i18n/utils';
+
+const locale = 'en' as const;
+const allPosts = await getCollection('blog');
+const localePosts = allPosts.filter((p) => p.data.locale === locale && !p.data.draft);
+const allTags = [...new Set(localePosts.flatMap((p) => p.data.tags))].sort();
+
+const title = t('seo.blogTitle', locale);
+const description = t('seo.blogDescription', locale);
+---
+
+<BaseLayout {title} {description} {locale}>
+  <section class="container section">
+    <h1 class="mb-10">{t('nav.blog', locale)}</h1>
+    <SearchBar {locale} />
+    <TagFilter tags={allTags} {locale} />
+    <PostList posts={allPosts} {locale} />
+  </section>
+</BaseLayout>

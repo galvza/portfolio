@@ -1,0 +1,47 @@
+---
+/**
+ * Transições de página usando Astro View Transitions API.
+ * Sobrepõe a animação padrão com fade suave (~200ms).
+ * Incluir no <head> do layout principal.
+ */
+import { ViewTransitions } from 'astro:transitions';
+---
+
+<ViewTransitions />
+
+<style is:global>
+  /*
+    Fade personalizado para view transitions.
+    Substitui a animação padrão do Astro (slide) por um fade limpo.
+  */
+  @keyframes vt-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vt-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  ::view-transition-old(root) {
+    animation: vt-fade-out 180ms ease-out both;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-fade-in 220ms ease-in both;
+  }
+
+  /*
+    prefers-reduced-motion: desabilita as animações de transição.
+    A navegação ainda funciona — só sem efeito visual de motion.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none;
+    }
+  }
+</style>

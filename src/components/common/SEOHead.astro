@@ -1,0 +1,86 @@
+---
+import {
+  generateMetaTags,
+  generatePersonJsonLD,
+  generateBlogPostingJsonLD,
+  generateWebPageJsonLD,
+} from '@/utils/seo';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  title: string;
+  description: string;
+  locale: Locale;
+  siteUrl: string;
+  canonicalPath: string;
+  image?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  tags?: string[];
+}
+
+const { title, description, locale, siteUrl, canonicalPath, image, type = 'website', publishedTime, tags } =
+  Astro.props;
+
+const meta = generateMetaTags({ title, description, locale, siteUrl, canonicalPath, image, type, publishedTime, tags });
+
+// JSON-LD: Person na homepage, BlogPosting em artigos, WebPage nas demais
+const isHomepage = canonicalPath === '/' || canonicalPath === '/en' || canonicalPath === '/en/';
+let jsonld: string;
+if (isHomepage) {
+  jsonld = generatePersonJsonLD(siteUrl);
+} else if (type === 'article' && publishedTime) {
+  jsonld = generateBlogPostingJsonLD({
+    title,
+    description,
+    url: meta.canonical,
+    datePublished: publishedTime,
+    tags,
+    image: image ? (image.startsWith('http') ? image : `${siteUrl}${image}`) : undefined,
+  });
+} else {
+  jsonld = generateWebPageJsonLD({ title, description, url: meta.canonical, locale });
+}
+---
+
+{/* Primary */}
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={meta.canonical} />
+
+{/* Open Graph */}
+<meta property="og:type" content={meta.ogType} />
+<meta property="og:title" content={meta.ogTitle} />
+<meta property="og:description" content={meta.ogDescription} />
+<meta property="og:url" content={meta.canonical} />
+<meta property="og:image" content={meta.ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content={meta.ogLocale} />
+<meta property="og:site_name" content="Gabriel Alves de Souza" />
+{type === 'article' && publishedTime && (
+  <meta property="article:published_time" content={publishedTime.toISOString()} />
+)}
+{tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+
+{/* Twitter Card */}
+<meta name="twitter:card" content={meta.twitterCard} />
+<meta name="twitter:title" content={meta.ogTitle} />
+<meta name="twitter:description" content={meta.ogDescription} />
+<meta name="twitter:image" content={meta.ogImage} />
+
+{/* Hreflang */}
+{meta.hreflang.map(({ hreflang, href }) => (
+  <link rel="alternate" hreflang={hreflang} href={href} />
+))}
+
+{/* RSS feeds */}
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="Blog — Gabriel Alves de Souza"
+  href={locale === 'en' ? `${siteUrl}/en/rss.xml` : `${siteUrl}/rss.xml`}
+/>
+
+{/* JSON-LD */}
+<script type="application/ld+json" set:html={jsonld} />

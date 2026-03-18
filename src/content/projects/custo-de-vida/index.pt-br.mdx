@@ -1,0 +1,51 @@
+---
+title: O Custo de Vida do Brasileiro
+description: Dashboard interativo que visualiza 8 indicadores econômicos brasileiros ao longo de 20 anos, usando dados públicos do Banco Central, DIEESE e ANP.
+date: 2025-08-01
+locale: pt-br
+stack: [Python, Next.js 14, Recharts, GitHub Actions, Cloudflare Pages]
+liveUrl: https://custodevida.gsdigitais.com
+githubUrl: https://github.com/galvza/custo-de-vida
+image: /images/projects/custo-de-vida.png
+imageAlt: Screenshot do dashboard O Custo de Vida do Brasileiro
+featured: true
+order: 1
+---
+
+## O Contexto
+
+Os dados econômicos brasileiros são públicos, mas estão espalhados em dezenas de sites governamentais, cada um com seu formato e suas peculiaridades. Pra um cidadão comum — ou até pra um analista — entender como o custo de vida evoluiu nos últimos 20 anos exige horas de coleta manual e cruzamento de planilhas.
+
+## O Problema
+
+Como transformar dados públicos dispersos e difíceis de acessar em uma narrativa visual que qualquer pessoa consiga entender?
+
+## Decisões Técnicas
+
+Escolhi uma arquitetura de site estático com pipeline de dados automatizado:
+
+- **Python** para o ETL — extractors customizados para cada fonte (BCB SGS API, DIEESE via web scraping, ANP via CSV)
+- **Next.js 14** com static export para o frontend — performance máxima, zero servidor
+- **Recharts** para visualizações — escolhido sobre D3.js pela produtividade e integração com React
+- **GitHub Actions** para atualização semanal automática dos dados
+- **Cloudflare Pages** para deploy — CDN global, gratuito
+
+Uma decisão importante foi usar **normalização base-100** para exibir indicadores de escalas diferentes (IPCA, salário mínimo, preço da gasolina) no mesmo gráfico de forma comparável.
+
+## O Processo
+
+As APIs públicas brasileiras têm suas armadilhas. O BCB retornava erro 406 sem o header `Accept: application/json`. O DIEESE renderiza tabelas via JavaScript, exigindo scraping com abordagem diferente. A ANP muda o padrão de URL dos CSVs periodicamente.
+
+Cada problema exigiu uma estratégia defensiva de extração — retries, fallbacks e validação dos dados antes de processar.
+
+O design editorial foi inspirado no Our World in Data e Nexo Jornal: sem gradientes, sem sombras, tipografia serif para texto narrativo, estrutura em capítulos com texto hardcoded e dados calculados dinamicamente.
+
+## O Resultado
+
+Um dashboard funcional com 8 indicadores econômicos, atualizado automaticamente toda semana, acessível em qualquer dispositivo. Pipeline de dados 100% automatizado que roda sem intervenção desde o lançamento.
+
+## Aprendizados
+
+- APIs públicas brasileiras exigem estratégias defensivas de extração — nem tudo que está documentado funciona como esperado
+- Base-100 é a abordagem certa para exibir séries temporais de escalas diferentes no mesmo gráfico
+- Design editorial (narrativa + dados) produz resultado mais impactante que visualização pura

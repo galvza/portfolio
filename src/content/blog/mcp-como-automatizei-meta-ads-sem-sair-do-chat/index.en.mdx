@@ -1,0 +1,74 @@
+---
+title: "MCP: how I automated an entire Meta Ads operation without leaving the chat"
+description: "How I used MCP Servers to build a complete ad creation pipeline — from creative to launch — just by talking to an AI."
+date: 2026-03-10
+tags: ["mcp", "automation", "ai", "meta-ads", "productivity"]
+locale: "en"
+draft: false
+---
+
+If you work with LLMs (Claude, ChatGPT, Gemini), you've probably been there: you're in the middle of a productive conversation with the AI, you need to pull data from an external system, and then… you open another tab. Copy. Paste. Switch back. Lose context.
+
+MCP (Model Context Protocol) solves exactly that. And when I say "solves," I mean it completely changed the way I work.
+
+## What MCP actually is
+
+No jargon: MCP is a way to connect APIs from any service directly to your LLM. Gmail, Google Calendar, Slack, databases, ad APIs — anything with an API can become a tool that the AI uses without you leaving the chat.
+
+Instead of copying and pasting between tabs, you talk to the AI and it executes. Think of it as an assistant with access to all your systems.
+
+## What I built
+
+I was running Meta Ads operations at scale — six-figure monthly budgets. The process of launching a new campaign involved:
+
+1. Finding the approved creatives from the team
+2. Defining headlines and primary texts (or creating variations)
+3. Configuring campaign parameters (audience, budget, placement)
+4. Following the naming convention (to keep the ads manager organized)
+5. Reviewing everything before publishing
+
+Each new campaign took 30-40 minutes of repetitive work. It wasn't hard — it was tedious. And tedious breeds mistakes.
+
+So I built an MCP that did all of it.
+
+## How it worked
+
+I'd open Claude and type `/ad`. From that point on, the entire pipeline was automated.
+
+The AI already knew the path to fetch the creatives. Already knew which headlines and primary texts to use — and when to create variations. Knew the right settings for each creative type. Knew the naming conventions to follow.
+
+Everything automated. Every step. From start to finish.
+
+When it didn't know something — for example, a creative decision that depended on context — it asked me. We always had a guardrail, a threshold to prevent errors. My last step was always the same: **review and approve**.
+
+30-40 minutes became 5 minutes of review.
+
+## What it freed up
+
+Time. But not idle time — productive time. Instead of configuring campaigns by hand, I could:
+
+- Analyze performance of running campaigns
+- Build new automations for other processes
+- Give more detailed feedback to the creative team
+- Think strategy instead of executing operations
+
+This is the point many people miss about automation: **it's not about doing less. It's about doing what matters.**
+
+## Why MCP and not a traditional script?
+
+I could have built a Python script that does the same thing. But MCP has one advantage that changes everything: **natural language**.
+
+With a script, you need to anticipate every scenario, every exception, every edge case. With MCP + LLM, the AI adapts. If the creative is different from the standard, it asks. If information is missing, it searches. If something doesn't make sense, it flags it.
+
+It's the difference between a robot that follows rules and an assistant that understands context.
+
+## How to get started
+
+If you already use an LLM daily, MCP is the natural next step. Start simple:
+
+1. Identify a repetitive task that involves external systems
+2. Check if the service has an API
+3. Create an MCP server that connects that API to your LLM
+4. Test, adjust the guardrails, and use it
+
+You don't need to automate everything at once. One process. One workflow. If it works, you'll never go back.
