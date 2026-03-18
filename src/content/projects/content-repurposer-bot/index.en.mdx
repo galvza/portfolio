@@ -1,0 +1,67 @@
+---
+title: Content Repurposer Bot
+description: Automation bot that monitors viral tweets about AI and Marketing and automatically generates LinkedIn posts and SEO blog articles using Gemini AI.
+date: 2026-03-18
+locale: en
+stack: [n8n, Apify, Gemini Flash API, Supabase, Telegram]
+liveUrl: https://github.com/galvza/content-repurposer-bot
+githubUrl: https://github.com/galvza/content-repurposer-bot
+image: /images/projects/content-repurposer-bot.png
+imageAlt: Screenshot of the Content Repurposer Bot running on Telegram
+featured: true
+order: 3
+---
+
+## Context
+
+X (Twitter) and LinkedIn have become content machines. Every day, dozens of incredible tweets about AI and marketing fly through the feed — insights that could become posts, articles, valuable content. But the manual process of reading, selecting, adapting, writing, and formatting took hours.
+
+I thought: if I know automation, why not automate this?
+
+## The Problem
+
+How to turn viral tweets into ready-to-publish content for LinkedIn and blog — with no manual effort, no cost, and at scale?
+
+## Technical Decisions
+
+- **n8n** as orchestrator — the most flexible automation tool, visual, open source. Zapier and Make are more limited and paid
+- **Apify** for Twitter scraping — Twitter scraping is complex (anti-bot, rate limits, API changes). Apify has ready-made actors that handle it, with a US$5/month free tier that covers the entire project
+- **Gemini Flash** as the AI generator — best free AI for text. 1500 requests/day on free tier, no credit card required. GPT-4 would be more powerful but costs money
+- **Supabase** as the database — real PostgreSQL, generous free tier, native node in n8n
+- **Telegram** as the delivery channel — bot in 2 minutes, no cost, instant notifications on phone
+
+Entire stack on free tier. Monthly cost: $0.
+
+## The Process
+
+The pipeline works in stages:
+
+1. **Scraping** — Apify collects high-engagement tweets about AI and Marketing
+2. **Scoring** — scoring system with weights: likes ×1, retweets ×2, replies ×3. The more qualitative interaction, the higher the score
+3. **Storage** — tweets saved in Supabase with deduplication
+4. **Generation** — Gemini Flash receives the tweet and generates two outputs: LinkedIn post (professional tone, in Portuguese) and SEO blog article with ~1000 words (title, meta description, headings, keywords)
+5. **Delivery** — everything sent via Telegram with formatting, original tweet link, and engagement score
+
+The biggest challenge wasn't the AI — it was the scraping. Twitter is increasingly restrictive. I tested 4 different Apify actors before finding one that worked on the free tier. I learned that production automation is 80% dealing with rate limits, timeouts, and unexpected formats.
+
+Another issue: synchronous calls to slow APIs don't work. I had to migrate to an asynchronous pattern (fire → wait → fetch) to avoid timeouts in n8n.
+
+An insight about Gemini Flash: it spent 95% of tokens "thinking" and cut off the response. Turning off thinking mode (`thinkingBudget: 0`) solved it. More "intelligence" isn't always better — sometimes you just want the direct output.
+
+And the JSON parser was the node that caused the most trouble. AI doesn't return perfect JSON every time — you need robust fallbacks.
+
+## The Result
+
+- 5-10 posts generated daily automatically (LinkedIn + full SEO blog article)
+- ~2 hours saved per day on research and writing
+- 76 tweets collected and ranked by engagement on the first run
+- A 2-line tweet becomes a 1000-word article with title, meta description, headings, and keywords
+- Monthly cost: $0
+
+## Lessons Learned
+
+- Production automation is 80% handling edge cases — rate limits, timeouts, unexpected formats, APIs that change
+- Asynchronous pattern (fire → wait → fetch) is essential for slow APIs in orchestrators like n8n
+- More AI "intelligence" isn't always better — turning off Gemini Flash's thinking mode fixed truncated responses
+- JSON parser needs robust fallbacks — AI doesn't return perfect JSON 100% of the time
+- A 100% free stack is possible for real projects — well-combined free tiers cover a lot
