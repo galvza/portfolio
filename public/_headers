@@ -12,7 +12,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://formspree.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://formspree.io
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://formspree.io blob:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://formspree.io
 
 # ── Assets estáticos — cache imutável por 1 ano ─────────────────────────────
 # Nota: estas regras vêm após /* e portanto sobrescrevem o Cache-Control acima.
