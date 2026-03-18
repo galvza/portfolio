@@ -10,7 +10,7 @@ const { locale } = Astro.props;
 ---
 
 <button
-  id="theme-toggle"
+  data-theme-toggle
   type="button"
   aria-label={t('common.darkMode', locale)}
   data-label-dark={t('common.darkMode', locale)}
@@ -63,55 +63,50 @@ const { locale } = Astro.props;
 <script>
   import { toggleTheme, setupSystemThemeListener } from '@/scripts/theme';
 
-  function syncToggle() {
-    const btn = document.getElementById('theme-toggle');
-    if (!btn) return;
+  const SELECTOR = '[data-theme-toggle]';
 
+  function syncAllToggles() {
     const isDark = document.documentElement.classList.contains('dark');
-    const sun = btn.querySelector<SVGElement>('.sun-icon');
-    const moon = btn.querySelector<SVGElement>('.moon-icon');
+    document.querySelectorAll<HTMLButtonElement>(SELECTOR).forEach((btn) => {
+      const sun = btn.querySelector<SVGElement>('.sun-icon');
+      const moon = btn.querySelector<SVGElement>('.moon-icon');
 
-    // No dark mode: mostra sol (vai para light), esconde lua
-    if (sun) sun.classList.toggle('hidden', !isDark);
-    if (moon) moon.classList.toggle('hidden', isDark);
+      if (sun) sun.classList.toggle('hidden', !isDark);
+      if (moon) moon.classList.toggle('hidden', isDark);
 
-    // aria-label: descreve a ação que o botão vai executar
-    const labelDark = btn.getAttribute('data-label-dark') ?? 'Dark mode';
-    const labelLight = btn.getAttribute('data-label-light') ?? 'Light mode';
-    btn.setAttribute('aria-label', isDark ? labelLight : labelDark);
+      const labelDark = btn.getAttribute('data-label-dark') ?? 'Dark mode';
+      const labelLight = btn.getAttribute('data-label-light') ?? 'Light mode';
+      btn.setAttribute('aria-label', isDark ? labelLight : labelDark);
+    });
   }
 
-  function initToggle() {
-    const btn = document.getElementById('theme-toggle');
-    if (!btn || btn.dataset.themeInit) return;
-    btn.dataset.themeInit = 'true';
+  function initToggles() {
+    document.querySelectorAll<HTMLButtonElement>(SELECTOR).forEach((btn) => {
+      if (btn.dataset.themeInit) return;
+      btn.dataset.themeInit = 'true';
 
-    btn.addEventListener('click', () => {
-      toggleTheme();
-      syncToggle();
-      // Plausible event
-      const newTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-      if (typeof window.plausible === 'function') {
-        window.plausible('switch_theme', { props: { to: newTheme } });
-      }
+      btn.addEventListener('click', () => {
+        toggleTheme();
+        syncAllToggles();
+        const newTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        if (typeof window.plausible === 'function') {
+          window.plausible('switch_theme', { props: { to: newTheme } });
+        }
+      });
     });
 
-    // Sincroniza ícone com o tema atual (já aplicado pelo script anti-flash ou astro:before-swap)
-    syncToggle();
+    syncAllToggles();
   }
 
-  // Re-inicializa o botão em cada navegação (View Transitions substitui o elemento DOM)
-  document.addEventListener('astro:page-load', initToggle);
+  // Re-inicializa em cada navegação (View Transitions substitui o DOM)
+  document.addEventListener('astro:page-load', initToggles);
 
-  // Fallback: Safari iOS nem sempre dispara astro:page-load na primeira carga.
-  // Usa data-attribute pra evitar dupla inicialização se ambos dispararem.
+  // Fallback: Safari iOS nem sempre dispara astro:page-load na primeira carga
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initToggle);
+    document.addEventListener('DOMContentLoaded', initToggles);
   } else {
-    initToggle();
+    initToggles();
   }
 
-  // Acompanha mudanças no prefers-color-scheme — registrado uma vez, persiste entre navegações.
-  // syncToggle usa document.getElementById, então sempre encontra o botão atual.
-  setupSystemThemeListener(syncToggle);
+  setupSystemThemeListener(syncAllToggles);
 </script>
