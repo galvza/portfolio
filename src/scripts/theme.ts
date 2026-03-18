@@ -11,9 +11,9 @@ export function getTheme(): Theme {
   try {
     const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
     if (saved === 'dark' || saved === 'light') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'dark';
   } catch {
-    return 'light';
+    return 'dark';
   }
 }
 
