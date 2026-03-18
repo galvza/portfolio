@@ -66,26 +66,10 @@ const contactHref = getLocalizedPath('/contato', locale);
 
       </div>
 
-      {/* Foto mobile: centralizada, sem corte estranho */}
+      {/* Foto */}
       <div
         data-scroll-reveal='{"direction":"up","delay":0.1,"duration":0.8}'
-        class="w-full h-[350px] overflow-hidden lg:hidden"
-      >
-        <img
-          src="/images/gabriel.png"
-          alt="Gabriel Alves de Souza"
-          width="460"
-          height="460"
-          loading="eager"
-          decoding="async"
-          class="w-full h-full object-cover object-top grayscale opacity-60 scale-110"
-        />
-      </div>
-
-      {/* Foto desktop: cortada pela borda direita */}
-      <div
-        data-scroll-reveal='{"direction":"up","delay":0.1,"duration":0.8}'
-        class="hidden lg:block relative h-[500px] xl:h-[600px] -mr-[40%] overflow-hidden"
+        class="relative overflow-hidden h-[350px] md:h-[450px] lg:h-[550px] xl:h-[620px]"
       >
         <img
           src="/images/gabriel.png"
