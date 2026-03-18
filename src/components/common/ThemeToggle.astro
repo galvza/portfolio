@@ -83,7 +83,8 @@ const { locale } = Astro.props;
 
   function initToggle() {
     const btn = document.getElementById('theme-toggle');
-    if (!btn) return;
+    if (!btn || btn.dataset.themeInit) return;
+    btn.dataset.themeInit = 'true';
 
     btn.addEventListener('click', () => {
       toggleTheme();
@@ -101,6 +102,14 @@ const { locale } = Astro.props;
 
   // Re-inicializa o botão em cada navegação (View Transitions substitui o elemento DOM)
   document.addEventListener('astro:page-load', initToggle);
+
+  // Fallback: Safari iOS nem sempre dispara astro:page-load na primeira carga.
+  // Usa data-attribute pra evitar dupla inicialização se ambos dispararem.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggle);
+  } else {
+    initToggle();
+  }
 
   // Acompanha mudanças no prefers-color-scheme — registrado uma vez, persiste entre navegações.
   // syncToggle usa document.getElementById, então sempre encontra o botão atual.
