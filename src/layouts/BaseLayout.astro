@@ -43,10 +43,11 @@ const siteUrl = (Astro.site?.toString() ?? 'https://gsdigitais.com').replace(/\/
       try {
         const saved = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
+        const theme = saved || 'dark';
         document.documentElement.classList.toggle('dark', theme === 'dark');
       } catch {
-        // localStorage bloqueado (modo privado, CSP, etc.) — usa light
+        // localStorage bloqueado (modo privado, CSP, etc.) — usa dark
+        document.documentElement.classList.add('dark');
       }
     </script>
 
