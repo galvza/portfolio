@@ -1,0 +1,67 @@
+---
+title: Content Repurposer Bot
+description: Bot de automação que monitora tweets virais sobre IA e Marketing e gera automaticamente conteúdo para LinkedIn e blog SEO usando Gemini AI.
+date: 2026-03-18
+locale: pt-br
+stack: [n8n, Apify, Gemini Flash API, Supabase, Telegram]
+liveUrl: https://github.com/galvza/content-repurposer-bot
+githubUrl: https://github.com/galvza/content-repurposer-bot
+image: /images/projects/content-repurposer-bot.png
+imageAlt: Screenshot do Content Repurposer Bot funcionando no Telegram
+featured: true
+order: 3
+---
+
+## O Contexto
+
+O X (Twitter) e o LinkedIn viraram máquinas de conteúdo. Todo dia dezenas de tweets incríveis sobre IA e marketing passam pelo feed — insights que poderiam virar posts, artigos, conteúdo de valor. Mas o processo manual de ler, selecionar, adaptar, escrever e formatar tomava horas.
+
+Pensei: se eu sei automação, por que não automatizar isso?
+
+## O Problema
+
+Como transformar tweets virais em conteúdo pronto pra LinkedIn e blog — sem esforço manual, sem custo e em escala?
+
+## Decisões Técnicas
+
+- **n8n** como orquestrador — o mais flexível pra automação, visual, open source. Zapier e Make são mais limitados e pagos
+- **Apify** para scraping do Twitter — scraping de Twitter é complexo (anti-bot, rate limits, mudanças de API). Apify tem actors prontos que resolvem, com free tier de US$5/mês que cobre o projeto inteiro
+- **Gemini Flash** como IA geradora — melhor IA gratuita pra texto. 1500 requests/dia no free tier, sem cartão de crédito. GPT-4 seria mais potente mas custa
+- **Supabase** como banco — PostgreSQL real, free tier generoso, node nativo no n8n
+- **Telegram** como canal de entrega — bot em 2 minutos, sem custo, notificações instantâneas no celular
+
+Stack inteira no free tier. Custo mensal: R$0.
+
+## O Processo
+
+O pipeline funciona em etapas:
+
+1. **Scraping** — Apify coleta tweets sobre IA e Marketing com alto engajamento
+2. **Scoring** — sistema de pontuação com pesos: likes ×1, retweets ×2, replies ×3. Quanto mais interação qualitativa, maior o score
+3. **Armazenamento** — tweets salvos no Supabase com deduplicação
+4. **Geração** — Gemini Flash recebe o tweet e gera dois outputs: post pra LinkedIn (tom profissional, em português) e artigo de blog SEO com ~1000 palavras (título, meta description, headings, keywords)
+5. **Entrega** — tudo enviado via Telegram com formatação, link do tweet original e score de engajamento
+
+O maior desafio não foi a IA — foi o scraping. Twitter está cada vez mais restritivo. Testei 4 actors diferentes da Apify até achar um que funcionava no free tier. Aprendi que automação em produção é 80% lidar com rate limits, timeouts e formatos inesperados.
+
+Outro problema: chamadas síncronas pra APIs lentas não funcionam. Tive que migrar pro padrão assíncrono (fire → wait → fetch) pra não dar timeout no n8n.
+
+Um insight sobre o Gemini Flash: ele gastava 95% dos tokens "pensando" e cortava a resposta. Desligar o thinking mode (`thinkingBudget: 0`) resolveu. Nem sempre mais "inteligência" é melhor — às vezes você só quer o output direto.
+
+E o parser de JSON foi o node que mais deu trabalho. IA não retorna JSON perfeito sempre — precisa de fallbacks robustos.
+
+## O Resultado
+
+- 5-10 posts gerados por dia automaticamente (LinkedIn + blog SEO completo)
+- ~2 horas economizadas por dia de pesquisa e escrita
+- 76 tweets coletados e ranqueados por engajamento na primeira execução
+- Um tweet de 2 linhas vira um artigo de 1000 palavras com título, meta description, headings e keywords
+- Custo mensal: R$0
+
+## Aprendizados
+
+- Automação em produção é 80% lidar com edge cases — rate limits, timeouts, formatos inesperados, APIs que mudam
+- Padrão assíncrono (fire → wait → fetch) é essencial pra APIs lentas em orquestradores como n8n
+- Nem sempre mais "inteligência" da IA é melhor — desligar o thinking mode do Gemini Flash resolveu o problema de respostas cortadas
+- Parser de JSON precisa de fallbacks robustos — IA não retorna JSON perfeito 100% das vezes
+- Stack 100% gratuita é possível pra projetos reais — free tiers bem combinados cobrem muita coisa
