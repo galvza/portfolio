@@ -3,6 +3,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// iOS Safari: barra de endereço dinâmica causa resize events que
+// quebram cálculos do ScrollTrigger. ignoreMobileResize evita isso.
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 interface RevealProps {
@@ -185,8 +189,10 @@ export function initAnimations(): void {
     initParallax();
   }
 
-  // Refresh garante que ScrollTrigger detecte elementos já no viewport
-  ScrollTrigger.refresh();
+  // Safari precisa de um frame antes do refresh para que o layout esteja pronto
+  requestAnimationFrame(() => {
+    ScrollTrigger.refresh();
+  });
 
   // Timeout de segurança: se algo travar, forçar visibilidade após 3s
   setTimeout(() => {
@@ -199,8 +205,23 @@ export function initAnimations(): void {
   }, 3000);
 }
 
-// Único ponto de entrada: astro:page-load dispara na carga inicial E em cada
-// navegação com View Transitions. Usar só este evento evita dupla inicialização
-// (DOMContentLoaded + astro:page-load), que causava kill/reset das animações
-// antes do primeiro frame ser pintado.
-document.addEventListener('astro:page-load', initAnimations);
+let initialized = false;
+
+function safeInit(): void {
+  if (initialized) return;
+  initialized = true;
+  initAnimations();
+}
+
+// astro:page-load: dispara na carga inicial e em navegações com View Transitions
+document.addEventListener('astro:page-load', () => {
+  initialized = false; // reset pra cada navegação
+  safeInit();
+});
+
+// Fallback: se astro:page-load não disparou em 1s (Safari iOS), inicializa via DOMContentLoaded/load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(safeInit, 100));
+} else {
+  setTimeout(safeInit, 100);
+}
