@@ -37,14 +37,21 @@ function initScrollReveal(isMobile: boolean): void {
 
     if (isMobile) {
       // Mobile: fade simples, sem slide
-      gsap.set(el, { opacity: 0 });
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 95%',
-        once: true,
-        onEnter: () =>
-          gsap.to(el, { opacity: 1, duration: 0.5, delay, ease: 'power2.out' }),
-      });
+      gsap.fromTo(
+        el,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.5,
+          delay,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 95%',
+            toggleActions: 'play none none none',
+          },
+        },
+      );
     } else if (stagger > 0) {
       // Desktop com stagger: anima os itens internos individualmente
       const items = el.querySelectorAll<HTMLElement>(
@@ -52,41 +59,44 @@ function initScrollReveal(isMobile: boolean): void {
       );
       const targets: Element[] = items.length > 0 ? Array.from(items) : Array.from(el.children);
 
-      gsap.set(targets, { opacity: 0, ...getFromVars(direction) });
       gsap.set(el, { opacity: 1 }); // wrapper fica visível; filhos que animam
-
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 95%',
-        once: true,
-        onEnter: () =>
-          gsap.to(targets, {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            duration,
-            delay,
-            stagger,
-            ease: 'power3.out',
-          }),
-      });
+      gsap.fromTo(
+        targets,
+        { opacity: 0, ...getFromVars(direction) },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          duration,
+          delay,
+          stagger,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 95%',
+            toggleActions: 'play none none none',
+          },
+        },
+      );
     } else {
       // Desktop sem stagger: anima o wrapper inteiro
-      gsap.set(el, { opacity: 0, ...getFromVars(direction) });
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 95%',
-        once: true,
-        onEnter: () =>
-          gsap.to(el, {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            duration,
-            delay,
-            ease: 'power3.out',
-          }),
-      });
+      gsap.fromTo(
+        el,
+        { opacity: 0, ...getFromVars(direction) },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          duration,
+          delay,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 95%',
+            toggleActions: 'play none none none',
+          },
+        },
+      );
     }
   });
 }
@@ -96,29 +106,37 @@ function initTimelineItems(isMobile: boolean): void {
 
   items.forEach((item, index) => {
     if (isMobile) {
-      gsap.set(item, { opacity: 0 });
-      ScrollTrigger.create({
-        trigger: item,
-        start: 'top 95%',
-        once: true,
-        onEnter: () => gsap.to(item, { opacity: 1, duration: 0.5, ease: 'power2.out' }),
-      });
+      gsap.fromTo(
+        item,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 95%',
+            toggleActions: 'play none none none',
+          },
+        },
+      );
     } else {
-      gsap.set(item, { opacity: 0, x: -32 });
-      ScrollTrigger.create({
-        trigger: item,
-        start: 'top 95%',
-        once: true,
-        onEnter: () =>
-          gsap.to(item, {
-            opacity: 1,
-            x: 0,
-            duration: 0.6,
-            // pequeno stagger sequencial dentro do mesmo "bloco" de viewport
-            delay: (index % 4) * 0.08,
-            ease: 'power3.out',
-          }),
-      });
+      gsap.fromTo(
+        item,
+        { opacity: 0, x: -32 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.6,
+          delay: (index % 4) * 0.08,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 95%',
+            toggleActions: 'play none none none',
+          },
+        },
+      );
     }
   });
 }
